@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Parser, Debug)]
 #[command(name = "project-finder")]
-#[command(version = "0.1")]
+#[command(version = "0.3")]
 #[command(about = "this program is made for helping developers easily find their projects")]
 struct Cli {
     #[arg(short, long)]

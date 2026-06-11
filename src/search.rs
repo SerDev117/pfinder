@@ -4,14 +4,17 @@ use crate::Language;
 use walkdir::{WalkDir, DirEntry};
 use dirs;
 
-
-pub fn find(lang: Language, maybe: Option<&str>) {
-
-        finder(lang, maybe);
+fn finder(lang: Language) -> &'static str {
+    match  lang {
+        Language::rust => "Cargo.toml",
+        Language::python => "requirements.txt",
+        Language::java => "pom.xml",
+        Language::cpp => "CMakeLists.txt",
+        Language::js => "package.json",
     }
+}
 
-
-fn finder(lang: Language, project: Option<&str>) {
+pub fn find(lang: Language, project: Option<&str>) {
     let paths = dirs::home_dir().unwrap();
     let idef = match lang {
         Language::cpp => Some("ClionProjects"),
@@ -19,7 +22,7 @@ fn finder(lang: Language, project: Option<&str>) {
         Language::js => Some("WebstormProjects"),
         Language::python => Some("PycharmProjects"),
         Language::rust => Some("RustroverProjects"),
-        _ => None,
+
     };
 
 
@@ -30,33 +33,58 @@ fn finder(lang: Language, project: Option<&str>) {
     serc.push(paths.join("AndroidStudioProjects"));
     serc.push(paths.join("projects"));
     serc.push(paths.join("myproject"));
-serc.push(paths.join("code"));
+    serc.push(paths.join("code"));
     if let Some(dir) = idef {
-        if (std::fs::read_dir(dir).map_or(true, |mut d| d.next().is_none())) {
-            serc.push(paths.join(PathBuf::from(dir)));
+        serc.push(paths.join(dir));
+    }
+    let mut found = false;
+
             for pathc in serc {
                 if (!pathc.exists()) {
                     continue;
                 }
-                for entypress in WalkDir::new(&pathc).min_depth(1).max_depth(1) {
+                for entypress in WalkDir::new(pathc).min_depth(1).max_depth(1) {
                     if let Ok(entry) = entypress {
                         if entry.file_type().is_dir() {
                             match project {
                                 Some(name) if entry.file_name().to_string_lossy() == name => {
                                     println!("{}", entry.path().display());
+                                    found = true;
                                 }
                                 None => {
                                     println!("{}", entry.path().display());
+                                    found = true;
                                 }
                                 _ => {}
                             }
                         }
                     }
                 }
+                if !found {
+                    let marker = finder(lang);
+                    for entry in WalkDir::new(&paths).min_depth(1).max_depth(4) {
+                       if let Ok(entry) = entry {
+                           if entry.file_name().to_string_lossy() == marker {
+                               if let Some(parent) = entry.path().parent() {
+                                   match project {
+                                       Some(name) if parent.file_name().map_or(false, |n| n.to_string_lossy() == name) => {
+                                           println!("{}", parent.display());
+                                       }
+                                       None => println!("{}", parent.display()),
+                                       _ => {},
+                                   }
+                               }
+                           }
+                       }
+                    }
+                }
             }
+
         }
-    }
 
 
 
-}
+
+
+
+
