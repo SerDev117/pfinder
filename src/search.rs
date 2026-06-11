@@ -31,7 +31,6 @@ fn finder(lang: Language, project: Option<&str>) {
     serc.push(paths.join("projects"));
     serc.push(paths.join("myproject"));
 serc.push(paths.join("code"));
-    serc.push(paths.join(""));
     if let Some(dir) = idef {
         if (std::fs::read_dir(dir).map_or(true, |mut d| d.next().is_none())) {
             serc.push(paths.join(PathBuf::from(dir)));
